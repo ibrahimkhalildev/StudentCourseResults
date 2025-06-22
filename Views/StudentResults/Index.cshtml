@@ -2,52 +2,83 @@
 
 @{
     ViewData["Title"] = "Index";
+
+    var statusList = ViewBag.StatusList as IEnumerable<string> ?? new List<string>();
+    var selectedStatus = ViewBag.StatusFilter as string ?? "All";
 }
 
-<h1>Index</h1>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="fw-bold border-bottom pb-2 mb-4">
+            <i class="bi bi-mortarboard-fill me-2"></i>Student Results
+        </h2>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-plus-circle me-1"></i> Create New
+        </a>
+    </div>
 
-<p>
-    <a asp-action="Create">Create New</a>
-</p>
-<table class="table">
-    <thead>
-        <tr>
-            <th>
-                @Html.DisplayNameFor(model => model.StudentName)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.CourseTitle)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.TotalMarks)
-            </th>
-            <th>
-                @Html.DisplayNameFor(model => model.Status)
-            </th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-@foreach (var item in Model) {
-        <tr>
-            <td>
-                @Html.DisplayFor(modelItem => item.StudentName)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.CourseTitle)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.TotalMarks)
-            </td>
-            <td>
-                @Html.DisplayFor(modelItem => item.Status)
-            </td>
-            <td>
-                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
-            </td>
-        </tr>
-}
-    </tbody>
-</table>
+
+    <form asp-action="Index" method="get" class="mb-4 d-flex align-items-center gap-2">
+        <label for="statusFilter" class="form-label mb-0 me-2">Filter by Status:</label>
+        <select name="statusFilter" id="statusFilter" class="form-select w-auto">
+            @foreach (var status in statusList)
+            {
+                <option value="@status" selected="@(status == selectedStatus ? "selected" : null)">@status</option>
+            }
+        </select>
+        <button type="submit" class="btn btn-primary">
+            <i class="bi bi-search"></i> Search
+        </button>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-x-circle"></i> Clear
+        </a>
+    </form>
+
+
+    <table class="table table-bordered table-striped">
+        <thead class="table-dark">
+            <tr>
+                <th>@Html.DisplayNameFor(model => model.Id)</th>
+                <th>@Html.DisplayNameFor(model => model.StudentName)</th>
+                <th>@Html.DisplayNameFor(model => model.CourseTitle)</th>
+                <th>@Html.DisplayNameFor(model => model.TotalMarks)</th>
+                <th>@Html.DisplayNameFor(model => model.Status)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Id</td>
+                    <td>@Html.DisplayFor(modelItem => item.StudentName)</td>
+                    <td>@Html.DisplayFor(modelItem => item.CourseTitle)</td>
+                    <td>@Html.DisplayFor(modelItem => item.TotalMarks)</td>
+                    <td>
+                        @{
+                            var badgeClass = item.Status switch
+                            {
+                                StudentCourseResults.Models.ResultStatusName.NeedsImprovement => "badge bg-danger",
+                                StudentCourseResults.Models.ResultStatusName.Good => "badge bg-warning text-dark",
+                                StudentCourseResults.Models.ResultStatusName.Excellent => "badge bg-success",
+                                _ => "badge bg-secondary"
+                            };
+                        }
+                        <span class="@badgeClass">@item.Status</span>
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-outline-warning me-1">
+                            <i class="bi bi-pencil-square"></i> Edit
+                        </a>
+                        <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-outline-info me-1">
+                            <i class="bi bi-eye"></i> Details
+                        </a>
+                        <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-outline-danger">
+                            <i class="bi bi-trash"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
